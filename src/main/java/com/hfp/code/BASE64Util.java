@@ -1,15 +1,6 @@
-/**
- * 
- */
 package com.hfp.code;
 
-
 import java.nio.charset.Charset;
-
-/**
- * @author Administrator
- *
- */
 
 public class BASE64Util {
 	/**
@@ -21,8 +12,7 @@ public class BASE64Util {
 	 */
 	public static String encode(String source) {
 		byte[] input = source.getBytes(Charset.forName("UTF-8"));
-		byte[] output = new org.apache.commons.codec.binary.Base64().encode(input);
-		return new String(output);
+		return encode(input);
 	}
 
 	public static String encode(byte[] source) {
@@ -39,7 +29,11 @@ public class BASE64Util {
 	 */
 	public static String decode(String source) {
 		byte[] input = source.getBytes(Charset.forName("UTF-8"));
-		byte[] output = new org.apache.commons.codec.binary.Base64().decode(input);
+		return decode(input);
+	}
+
+	public static String decode(byte[] source) {
+		byte[] output = new org.apache.commons.codec.binary.Base64().decode(source);
 		return new String(output);
 	}
 
@@ -54,12 +48,10 @@ public class BASE64Util {
 	public static void main(String[] args) {
 		String source = "最近写了个工具,客户需要用jar运行";
 
-		BASE64Util.encode(source);
-		
-		String encodedStr = encode(source);
+		String encodedStr = BASE64Util.encode(source);
 		System.out.println("BASE64加密结果:"+encodedStr);
 
-		String decodedStr = decode(encodedStr);
+		String decodedStr = BASE64Util.decode(encodedStr);
 		System.out.println("BASE64解密结果:"+decodedStr);
 	}
 }

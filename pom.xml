@@ -24,6 +24,41 @@
 			<version>1.12</version>
 		</dependency>
 	</dependencies>
+	
+	<!-- 
+	<distributionManagement>
+        <repository>
+             	这里的ID要和setting的id一致
+            <id>maven-repository-releases</id>
+            <url>http://ip:8081/nexus/content/repositories/thirdparty/</url>
+        </repository>
+             这是打成快照版本的配置，如果不用这个snapshotRepository标签，打包失败，会报权限问题
+        <snapshotRepository>
+            <id>maven-repository-snapshots</id>
+            <url>http://ip:8081/nexus/content/repositories/thirdparty</url>
+        </snapshotRepository>
+    </distributionManagement>
+    -->
     <build>
+        <plugins>
+            <!-- 要将源码放上去，需要加入这个插件 -->
+            <plugin>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>2.1</version>
+                <configuration>
+                    <attach>true</attach>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
     </build>
+
+
 </project>
