@@ -101,9 +101,9 @@ public class QrcodeUtil {
         String text = "http://www.baidu.com";         // 二维码内容
         
         //File outputFile = new File("d:" + File.separator + "new.jpg");
-        //toQrcodeFile(text, outputFile, 90, 90, "jpg");
+        //QrcodeUtil.toQrcodeFile(text, outputFile, 90, 90, "jpg");
 
-        String img = toQrcodeString(text, 90, 90, "jpg");
+        String img = QrcodeUtil.toQrcodeString(text, 90, 90, "jpg");
     	System.out.println("<img src=\"date:image/jpg;base64,"+img+"\">");
     }
 
