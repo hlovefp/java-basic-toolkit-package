@@ -1,8 +1,36 @@
 package com.hfp.net;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
+
+/*
+import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpStatus;
+import org.apache.commons.httpclient.NameValuePair;
+import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.commons.httpclient.params.HttpMethodParams;
+*/
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -16,7 +44,7 @@ import okhttp3.Response;
 public class HttpUtils {
 
 	/**
-	 * post发送 application/json 格式数据，接收json格式数据
+	 * 使用OkHttp,post发送 application/json 格式数据，接收json格式数据
 	 * 请求与响应的Body都是Json对象
 	 * @param url
 	 * @param dataMap
@@ -77,4 +105,96 @@ public class HttpUtils {
 
 		return sendAndRecvJson(url, map);
 	}
+	
+	/**
+	 * 使用httpclient发送post请求
+	 * @param url
+	 * @param reqMap
+	 * @return
+	 */
+    public static String doPost(String url, Map<String, String> reqMap) {
+    	/*
+    	BasicHttpParams httpParams = new BasicHttpParams();
+		HttpConnectionParams.setConnectionTimeout(httpParams, 10 * 1000);
+		HttpConnectionParams.setSoTimeout(httpParams, 10 * 1000);
+		HttpClient client = new DefaultHttpClient(httpParams);
+		HttpResponse resp = client.execute(HttpPost);
+    	 */
+    	CloseableHttpClient httpClient = HttpClients.createDefault();
+    	CloseableHttpResponse response = null;
+        String resultString = "";
+        try {
+            HttpPost httpPost = new HttpPost(url);   // 创建Http Post请求
+            //httpPost.setHeader(name, value);
+
+            // 创建参数列表
+            if (reqMap != null) {
+                List<NameValuePair> paramList = new ArrayList<>();
+                for (String key : reqMap.keySet()) {
+                    paramList.add(new BasicNameValuePair(key, reqMap.get(key)));
+                }
+                // 键值对,类似于传统的application/x-www-form-urlencoded表单上传
+                UrlEncodedFormEntity formEntity = new UrlEncodedFormEntity(paramList);
+                //formEntity.setChunked(true);
+                //formEntity.setContentType("");
+                httpPost.setEntity(formEntity);
+                
+                /*
+                JSONObject postData = new JSONObject();
+                postData.put("supervisor", "1");
+                // StringEntity可以自己指定ContentType，而默认值是 text/plain，
+              	// 数据的形式就非常自由了，可以组织成自己想要的任何形式，一般用来存储json数据
+                StringEntity stringEntity = new StringEntity(postData.toString(), "utf-8");
+                //stringEntity.setContentType("");
+                httpPost.setEntity(stringEntity); 
+                */
+
+                
+
+                /*
+                 // HttpCient4.3之后上传文件主要使用的类是位于org.apache.http.entity.mime下的MultipartEntityBuilder
+                 MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+                // 第一个参数name的值，是服务器已经定义好的，服务器会根据这个字段来读取我们上传的文件流
+                
+                //builder.addBinaryBody(name, filePath, ContentType.create(mimeType), filename)
+                HttpEntity entity = builder.build();
+                
+                //  在HttpCient4.3之前上传文件主要使用MultipartEntity这个类
+                // MultipartEntity文件上传用到，类似于表单的类型为multipart/form-data
+				MultipartEntity entity = new MultipartEntity();
+ 				// 上传文本，"key" 为字段名,后边new StringBody(text,Charset.forName(CHARSET))为参数值，
+ 				// 其实就是正常的值转换成utf-8的编码格式  
+				entity.addPart("key",new StringBody(text, Charset.forName("UTF-8")));
+				entity.addPart("audio", new FileBody(new File("path"), "audio/*"));  // 上传音频文件  
+				entity.addPart("fileimg", new FileBody(new File("path1"), "image/*"));// 上传图片1  
+				entity.addPart("fileimg", new FileBody(new File("path2"), "image/*"));// 上传图片2  
+                httpPost.setEntity(entity); 
+                
+                // 服务端获取
+                //MultipartHttpServletRequest params=((MultipartHttpServletRequest) request);
+        		//List<MultipartFile> files = ((MultipartHttpServletRequest) request).getFiles("file");
+				// MultipartFile file = files.get(0);
+				// file.getOriginalFilename();
+				// file.getBytes();
+                */
+            }
+            
+            
+            
+            response = httpClient.execute(httpPost);  // 执行http请求
+            //response.getStatusLine().getStatusCode();
+            HttpEntity httpEntity = response.getEntity();
+            //InputStream is = httpEntity.getContent();
+            resultString = EntityUtils.toString(httpEntity, "utf-8");
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                response.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return resultString;
+    }
 }
