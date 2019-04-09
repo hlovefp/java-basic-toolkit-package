@@ -35,7 +35,7 @@ public class MessageDigestUtil {
 	 * @return 返回hex字符串
 	 */
 	public static String disguiseSHA1(String message,String encoding){
-    	return disguise(message, "SHA", encoding);
+    	return disguise(message, "SHA-1", encoding);  // "SHA" 或者 "SHA-1" 结果一致
     }
 	
 	/**
@@ -146,13 +146,13 @@ public class MessageDigestUtil {
 	}
 	
 	public static void main(String[] args){
-		listAlgorithm("MessageDigest");
-		System.out.println(disguiseMD2("&QuickPaySe机号码不一致"));
-		System.out.println(disguiseMD5("&QuickPaySe机号码不一致"));
+		//listAlgorithm("MessageDigest");
+		//System.out.println(disguiseMD2("&QuickPaySe机号码不一致"));
+		//System.out.println(disguiseMD5("&QuickPaySe机号码不一致"));
 		System.out.println(disguiseSHA1("&QuickPaySe机号码不一致"));
-		System.out.println(disguiseSHA224("&QuickPaySe机号码不一致"));
-		System.out.println(disguiseSHA256("&QuickPaySe机号码不一致"));
-		System.out.println(disguiseSHA384("&QuickPaySe机号码不一致"));
-		System.out.println(disguiseSHA512("&QuickPaySe机号码不一致"));
+		//System.out.println(disguiseSHA224("&QuickPaySe机号码不一致"));
+		//System.out.println(disguiseSHA256("&QuickPaySe机号码不一致"));
+		//System.out.println(disguiseSHA384("&QuickPaySe机号码不一致"));
+		//System.out.println(disguiseSHA512("&QuickPaySe机号码不一致"));
 	}
 }

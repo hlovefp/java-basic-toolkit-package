@@ -1,23 +1,28 @@
 package com.hfp.net;
 
 import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
@@ -41,7 +46,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class HttpUtils {
+public class HttpUtil {
 
 	/**
 	 * 使用OkHttp,post发送 application/json 格式数据，接收json格式数据
@@ -197,4 +202,174 @@ public class HttpUtils {
         }
         return resultString;
     }
+    
+    /**
+	 * 
+	 * 
+	 * @Description: 上传文件
+	 * @param @param url
+	 * @param @param paramsMap
+	 * @param @param fileName
+	 * @param @param file
+	 * @param @return
+	 * @return String
+	 * @throws
+	 */
+	@SuppressWarnings("deprecation")
+	public static String httpPost(String url, TreeMap<String, String> paramsMap, String fileName, File file) {
+		try {
+			HttpPost post = new HttpPost(url);
+			MultipartEntity reEntity = new MultipartEntity();
+			FileBody filebody = new FileBody(file);
+			reEntity.addPart(fileName, filebody);
+			Iterator<Map.Entry<String, String>> it = paramsMap.entrySet().iterator();
+			while ( it.hasNext()) {
+				Map.Entry<String, String> e = it.next();
+				reEntity.addPart(e.getKey(), new StringBody(e.getValue()));
+			}
+
+			post.setEntity(reEntity);
+			HttpResponse httpResponse = HttpClients.createDefault().execute(post);
+			HttpEntity httpEntity = httpResponse.getEntity();
+			return EntityUtils.toString(httpEntity, "UTF-8");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+    /**
+	 * 
+	 * HTTP协议GET请求方法
+	 */
+	public static String httpGet(String url) {
+
+		HttpURLConnection uc = null;
+		try {
+			URL urls = new URL(url);
+			uc = (HttpURLConnection) urls.openConnection();
+			uc.setRequestMethod("GET");
+			
+			uc.connect();
+			
+			StringBuffer sb = new StringBuffer();
+			BufferedReader in = new BufferedReader(new InputStreamReader(uc.getInputStream(),"UTF-8"));
+			String readLine = "";
+			while ((readLine = in.readLine()) != null) {
+				sb.append(readLine);
+			}
+			in.close();
+			
+			return sb.toString();
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			if (uc != null) {
+				uc.disconnect();
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * 
+	 * HTTP协议POST请求方法
+	 */
+	public static String httpPost(String url, String params) {
+		StringBuffer sb = new StringBuffer();
+		HttpURLConnection uc = null;
+		try {
+			URL urls = new URL(url);
+			uc = (HttpURLConnection) urls.openConnection();
+			uc.setRequestMethod("POST");
+			uc.setDoOutput(true);
+			uc.setDoInput(true);
+			uc.setUseCaches(false);
+			uc.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+			
+			uc.connect();
+			
+			DataOutputStream out = new DataOutputStream(uc.getOutputStream());
+			out.write(params.getBytes("UTF-8"));
+			out.flush();
+			out.close();
+			
+			BufferedReader in = new BufferedReader(new InputStreamReader(uc.getInputStream(),"UTF-8"));
+			String readLine = "";
+			while ((readLine = in.readLine()) != null) {
+				sb.append(readLine);
+			}
+			in.close();
+			
+			return sb.toString();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			if (uc != null) {
+				uc.disconnect();
+			}
+		}
+		
+		return null;
+	}
+
+	/**
+	 * 
+	 * HTTP协议POST请求方法
+	 */
+	public static String httpPost(String url, TreeMap<String, String> paramsMap) {
+
+		String params = null == paramsMap ? null : getParamStr(paramsMap); // key=value字符串
+
+		StringBuffer sb = new StringBuffer();
+		HttpURLConnection uc = null;
+		try {
+			URL urls = new URL(url);
+			uc = (HttpURLConnection) urls.openConnection();
+			uc.setRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 5.0; Windows NT; DigExt)");
+			uc.setDoOutput(true);
+			uc.setDoInput(true);
+			uc.setRequestMethod("POST");
+			uc.setUseCaches(false);
+			
+			uc.connect();
+			
+			DataOutputStream out = new DataOutputStream(uc.getOutputStream());
+			out.write(params.getBytes("UTF-8"));
+			out.flush();
+			out.close();
+			
+			BufferedReader in = new BufferedReader(new InputStreamReader(uc.getInputStream(), "UTF-8"));
+			String readLine = "";
+			while ((readLine = in.readLine()) != null) {
+				sb.append(readLine);
+			}
+			in.close();
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			if (uc != null) {
+				uc.disconnect();
+			}
+		}
+		return sb.toString();
+	}
+
+	/**
+	 * 
+	 * HTTP协议POST请求添加参数的封装方法
+	 */
+	private static String getParamStr(TreeMap<String, String> paramsMap) {
+		StringBuilder param = new StringBuilder();
+		Iterator<Map.Entry<String, String>> it = paramsMap.entrySet().iterator();
+		while (it.hasNext()) {
+			Map.Entry<String, String> e = it.next();
+			param.append("&")
+			     .append(e.getKey())
+			     .append("=")
+				 .append(e.getValue());
+		}
+		return param.toString().substring(1);
+	}
 }

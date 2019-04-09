@@ -1,5 +1,8 @@
 package com.hfp.code;
 
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.Security;
@@ -8,10 +11,15 @@ import java.util.Random;
 import java.util.Set;
 
 import javax.crypto.Cipher;
+import javax.crypto.CipherInputStream;
+import javax.crypto.CipherOutputStream;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.lang3.ArrayUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 public class AESUtil {
@@ -35,11 +43,17 @@ public class AESUtil {
 		String seed = String.valueOf(System.currentTimeMillis());
 		kgen.init( keysize, new SecureRandom(seed.getBytes()));  
 		SecretKey key = kgen.generateKey();  
-		SecretKeySpec keySpec = new SecretKeySpec(key.getEncoded(), "AES");  
+		SecretKeySpec keySpec = new SecretKeySpec(key.getEncoded(), "AES");
 		
-		// SecretKeySpec keySpec = new SecretKeySpec(PWD.getBytes("UTF-8"), "AES");  
+		// keyStr 是16/24/32长度字符串
+		//SecretKeySpec keySpec = new SecretKeySpec(keyStr.getBytes("UTF-8"), "AES");  
 		return keySpec;  
 	}
+	
+	private static final String IV = "1234567890123456";  
+	public static IvParameterSpec makeIv() throws UnsupportedEncodingException, DecoderException {  
+		return new IvParameterSpec(IV.getBytes("UTF-8"));  
+} 
 	
 	/**
 	 * 从[0-9a-zA-Z]中生成指定长度字符串密钥
@@ -68,9 +82,31 @@ public class AESUtil {
 			SecretKeySpec secretKey = new SecretKeySpec(key, "AES");
 			Cipher cipher = Cipher.getInstance(algorithm); // 创建密码器
 			cipher.init(Cipher.ENCRYPT_MODE, secretKey);  // 初始化
+			//  cipher.init(Cipher.ENCRYPT_MODE, secretKey, makeIv()); 
 			return cipher.doFinal(data);               // 加密
 		} catch (Exception e){
-			throw new RuntimeException("encrypt fail!", e);
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	public static void encrypt(InputStream is, OutputStream os, byte[] key, String algorithm) {
+		try {
+			SecretKeySpec secretKey = new SecretKeySpec(key, "AES");
+			Cipher cipher = Cipher.getInstance(algorithm); // 创建密码器
+			cipher.init(Cipher.ENCRYPT_MODE, secretKey);  // 初始化
+			CipherInputStream cin = new CipherInputStream(is, cipher);
+	        int readLength=0;
+	        byte[] buffer = new byte[1024];
+	        while ((readLength = cin.read(buffer)) != -1) {
+	        	System.out.print(HexUtil.toHex(buffer,readLength));
+	            os.write(buffer, 0, readLength);
+	        }
+	        
+	        os.close();
+	        cin.close();
+		} catch (Exception e){
+			e.printStackTrace();
 		}
 	}
 	
@@ -85,11 +121,35 @@ public class AESUtil {
 			SecretKeySpec secretKey = new SecretKeySpec(key, "AES");
 			Cipher cipher = Cipher.getInstance(algorithm); // 创建密码器
 			cipher.init(Cipher.DECRYPT_MODE, secretKey);   // 初始化
+			// cipher.init(Cipher.DECRYPT_MODE, secretKey, makeIv());  
 			return cipher.doFinal(data); // 解密
 		} catch (Exception e){
 			throw new RuntimeException("decrypt fail!", e);
 		}
 	}
+	
+	public static void decrypt(InputStream is, OutputStream os, byte[] key, String algorithm) {
+		try {
+			SecretKeySpec sk = new SecretKeySpec(key, algorithm.split("/")[0]);
+	        Cipher c = Cipher.getInstance(algorithm);
+	        SecureRandom sr = new SecureRandom();   // DES算法要求有一个可信任的随机数源
+	        c.init(Cipher.DECRYPT_MODE, sk, sr);    // 用密钥和随机源初始化此 cipher
+	
+	        CipherOutputStream cout = new CipherOutputStream(os, c);
+	
+	        byte[] buffer = new byte[1024];
+	        int readLength=0;
+	        while ((readLength = is.read(buffer)) != -1) {
+	            cout.write(buffer, 0, readLength);
+	        }
+	        cout.close();
+	        is.close();
+		} catch (Exception e){
+			e.printStackTrace();
+		}
+	}
+	
+	
 	
 	/**
 	 * AES加密 (AES/ECB/PKCS5Padding)
@@ -154,12 +214,8 @@ public class AESUtil {
 				paddingLength++;
 			}
 		}
-		byte[] dataByte = new byte[bytes.length-paddingLength];
-		System.arraycopy(bytes, 0, dataByte, 0, dataByte.length);
-		return new String(dataByte);
+		return new String(ArrayUtils.subarray(bytes, 0, bytes.length-paddingLength));
 	}
-	
-
 
 
 	/**
@@ -237,7 +293,7 @@ public class AESUtil {
 	}
 	
 	
-	public static void main(String[] args){
+	public static void main(String[] args) throws Exception{
 		//listAlgorithm("Cipher");
 		//addAlgorithm("Cipher");
 		//generateSecretKeySpec(255);
@@ -262,9 +318,17 @@ public class AESUtil {
 		//System.out.println(aes); // bdd71f373b44a08dbc977844696d2f082b49919a9412a017544cff5512aa2bac
 		//System.out.println(decryptAESZeroPadding(aes,"pgTyCu7OqIvyzDj2"));
 		
+		/*
 		String aes = encryptAESNoPadding("1234567890123456","pgTyCu7OqIvyzDj2");
 		System.out.println(aes); // bdd71f373b44a08dbc977844696d2f08
 		System.out.println(decryptAESNoPadding(aes,"pgTyCu7OqIvyzDj2"));
-
+		*/
+		
+		/*
+		byte[] key = new String("pgTyCu7OqIvyzDj2").getBytes();
+        encrypt(new FileInputStream("F:\\a.txt"), new FileOutputStream("F:\\b.txt"), key, "AES/ECB/PKCS5Padding"); // 结果同  "DESede"  ==> 3DES
+        // 123456789012345 => 58525a24d38dd33b2c8cb7cf0a052b19
+        decrypt(new FileInputStream("F:\\b.txt"), new FileOutputStream("F:\\c.txt"), key, "AES/ECB/PKCS5Padding");
+        */
 	}
 }

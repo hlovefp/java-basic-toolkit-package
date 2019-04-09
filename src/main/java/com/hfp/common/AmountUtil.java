@@ -15,21 +15,32 @@ public class AmountUtil {
 		}
     	return (int)(Double.valueOf(amount) * 100.0);
 	}
-	
 
 	/**  
-     * 将分为单位的转换为元 （除100）  
-     *   
+     * 将分为单位的转换为元 （除100）  : "100"转换成 "1"; "101"转换成 "1.01"
      * @param amount  ,不能有小数点
-     * @return  
+     * @return
      * @throws Exception   
      */    
-    public static String changeF2Y(String amount) throws Exception{    
+    public static String fty(String amount) throws Exception{    
         if(!amount.matches("\\-?[0-9]+")) {    
             throw new Exception("金额格式有误");    
         }    
         return BigDecimal.valueOf(Long.valueOf(amount)).divide(new BigDecimal(100)).toString();    
     }
+    
+    /**
+     * 将分为单位的转换为元 （除100）  : "100"转换成 "1.00"; "101"转换成 "1.01"
+     * @param amount
+     * @return
+     * @throws Exception
+     */
+    public static String fty2(String amount) throws Exception{    
+        if(!amount.matches("\\-?[0-9]+")) {    
+            throw new Exception("金额格式有误");    
+        }    
+        return BigDecimal.valueOf(Long.valueOf(amount)).divide(new BigDecimal(100)).setScale(2).toString();    
+    }  
 	
     /**
      * 将分转换成指定长度的字符串，前补0
@@ -108,5 +119,9 @@ public class AmountUtil {
 		//System.out.println(changeF2Y("123.4"));
 		//System.out.println(changeF2Y("1234"));
 		System.out.println(formatLeftZero(5,1234));
+		System.out.println(fty("100"));  // 1
+		System.out.println(fty("101"));  // 1.01
+
+		System.out.println(fty2("100")); // 1.00
 	}
 }

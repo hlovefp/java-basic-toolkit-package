@@ -29,6 +29,19 @@ public abstract class HexUtil {
 		}
 		return output.toString();
 	}
+	public static String toHex(byte input[], int len) {
+		if (input == null)
+			return "";
+		StringBuffer output = new StringBuffer(input.length * 2);
+		for (int i = 0; i < len; i++) {
+			int current = input[i] & 0xff;
+			if (current < 16)
+				output.append("0");
+			//Integer.toHexString(current);
+			output.append(Integer.toString(current, 16));
+		}
+		return output.toString();
+	}
 	
 	/**
 	 * Hex字符串转换成字节数组<p>
