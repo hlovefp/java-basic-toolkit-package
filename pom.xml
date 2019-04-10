@@ -65,6 +65,12 @@
 			<version>2.5</version>
 			<scope>provided</scope> <!-- provided意味着打包的时候可以不用包进去 -->
 		</dependency>
+		<dependency>
+		    <groupId>javax.mail</groupId>
+		    <artifactId>mail</artifactId>
+		    <version>1.4.7</version>
+		</dependency>
+		
 	</dependencies>
 	
 	<!-- 

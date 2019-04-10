@@ -568,6 +568,7 @@ public class RSAUtil {
         }
     }
     
+	@SuppressWarnings("unused")
 	private static byte[] buildPKCS8Key(String privateKey) throws IOException {
         if (privateKey.contains("-----BEGIN PRIVATE KEY-----")) {
             return Base64.decode(privateKey.replaceAll("-----\\w+ PRIVATE KEY-----", "").getBytes());

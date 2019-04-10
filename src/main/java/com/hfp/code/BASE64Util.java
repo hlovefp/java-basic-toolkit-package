@@ -1,7 +1,6 @@
 package com.hfp.code;
 
 import java.nio.charset.Charset;
-import java.util.Base64;
 
 /**
  * base64的工具：
