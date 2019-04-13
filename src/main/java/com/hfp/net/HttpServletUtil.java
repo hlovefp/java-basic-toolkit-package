@@ -1,8 +1,13 @@
 package com.hfp.net;
 
-import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 
-public class HostUtil {
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import com.alibaba.fastjson.JSONObject;
+
+public class HttpServletUtil {
 	/**
 	 * 获得客户端IP
 	 * @param request
@@ -54,5 +59,51 @@ public class HostUtil {
 		}
         
         return ip;
+	}
+	
+	public static void httpWriteBody(HttpServletResponse response,String body){
+		System.out.println("应答: "+body);
+		try {
+			response.setCharacterEncoding("utf-8");
+			response.setHeader("Content-type", "text/html;charset=UTF-8");
+			response.getWriter().write(body);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static void httpWriteJSON2Body(HttpServletResponse response,String respCode,String respMsg){
+		JSONObject object = new JSONObject();
+		object.put("respCode", respCode);
+		object.put("respMsg", respMsg);
+		String message = object.toJSONString();
+		
+		System.out.println("应答: "+message);
+		try {
+			response.setCharacterEncoding("utf-8");
+			response.setHeader("Content-type", "text/html;charset=UTF-8");
+			response.getWriter().write(message);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static void httpWriteHTML2Body(HttpServletResponse response,String respCode,String respMsg){
+		JSONObject object = new JSONObject();
+		object.put("respCode", respCode);
+		object.put("respMsg", respMsg);
+		String message = null;
+		message = "<html><head><meta name='viewport' content='width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no'/></head><body><h4>";
+		message = message + object.toJSONString();
+		message = message + "</h4></body></html>";
+		
+		System.out.println("应答: "+message);
+		try {
+			response.setCharacterEncoding("utf-8");
+			response.setHeader("Content-type", "text/html;charset=UTF-8");
+			response.getWriter().write(message);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 }

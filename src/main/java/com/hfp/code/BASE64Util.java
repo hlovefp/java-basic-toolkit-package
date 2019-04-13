@@ -45,12 +45,11 @@ public class BASE64Util {
 	 */
 	public static String encode(String source) {
 		byte[] input = source.getBytes(Charset.forName("UTF-8"));
-		return encode(input);
+		return new String(encode(input));
 	}
 
-	public static String encode(byte[] source) {
-		byte[] output = new org.apache.commons.codec.binary.Base64().encode(source);
-		return new String(output);
+	public static byte[] encode(byte[] source) {
+		return new org.apache.commons.codec.binary.Base64().encode(source);
 	}
 
 	/**

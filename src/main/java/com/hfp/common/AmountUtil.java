@@ -2,6 +2,8 @@ package com.hfp.common;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
+import java.text.MessageFormat;
+import java.util.Locale;
 
 public class AmountUtil {
     
@@ -15,6 +17,15 @@ public class AmountUtil {
 		}
     	return (int)(Double.valueOf(amount) * 100.0);
 	}
+	
+	/**
+     * 将元为单位的转换为分 ，支持以逗号区分的金额,包含$和￥的金额
+     */
+    public static String changeY2F(String amount) {
+    	if(amount==null) return "0";
+        String currency = amount.replaceAll("\\$|\\￥|\\,", "");  //处理包含, 去掉符号 ￥  $ ,
+        return String.valueOf(ytf(currency));
+    }
 
 	/**  
      * 将分为单位的转换为元 （除100）  : "100"转换成 "1"; "101"转换成 "1.01"
@@ -50,6 +61,24 @@ public class AmountUtil {
      */
 	public static String formatLeftZero(int length, int fen){
 		return String.format("%0"+length+"d",  fen);
+	}
+	
+	/**
+	 * 
+	 * @param amount
+	 * @return
+	 */
+	public static String format(int amount){
+		//System.out.println(Locale.getDefault().toString());  // zh_CN  ==> ￥100.00
+		return MessageFormat.format("{0,number,currency}",amount);
+	}
+	
+	public static String format(int amount,Locale newLocale){
+		Locale defaultLocale = Locale.getDefault();
+		Locale.setDefault(newLocale);
+		String result = MessageFormat.format("{0,number,currency}",amount);
+		Locale.setDefault(defaultLocale);
+		return result;
 	}
 	
 	/**
@@ -118,10 +147,14 @@ public class AmountUtil {
 		//System.out.println(ytf("1230.0"));
 		//System.out.println(changeF2Y("123.4"));
 		//System.out.println(changeF2Y("1234"));
+		/*
 		System.out.println(formatLeftZero(5,1234));
 		System.out.println(fty("100"));  // 1
 		System.out.println(fty("101"));  // 1.01
-
 		System.out.println(fty2("100")); // 1.00
+		*/
+		System.out.println(format(100));
+		System.out.println(format(100,Locale.CHINA));  // ￥100.00
+		System.out.println(format(100,Locale.US));     // $100.00
 	}
 }

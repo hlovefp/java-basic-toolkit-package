@@ -9,19 +9,55 @@ import java.util.TreeSet;
 public class MapUtil {
 	
 	/**
-	 * 返回排序后的key=value&key=value字符串
+	 * 返回key=value&key=value字符串
+	 * @param paramMap
+	 * @return
+	 * @throws Exception
+	 */
+	public static String map2FormString(Map paramMap) {
+		
+		if(paramMap == null){
+			return "";
+		}
+
+		StringBuilder paramString = new StringBuilder();
+
+		Iterator iterator = paramMap.keySet().iterator();
+		while(iterator.hasNext()){
+			String key = iterator.next().toString();
+			Object value = paramMap.get(key);
+			paramString.append(key)
+				.append("=")
+				.append(value==null?"":value.toString())
+				.append("&");
+		}
+
+		return paramString.toString().substring(0, paramString.length()-1);
+	}
+	
+	/**
+	 * 返回根据key排序后的key=value&key=value字符串
 	 * @param paramMap
 	 * @return
 	 * @throws Exception
 	 */
 	@SuppressWarnings("all")
-	public static String sort(Map paramMap) {
+	public static String map2SortFormString(Map paramMap) {
 		
 		if(paramMap == null){
-			return null;
+			return "";
 		}
 
 		StringBuilder sort = new StringBuilder();
+		
+		/*
+		List<String> keys = new ArrayList<String>(paramMap.keySet());
+        Collections.sort(keys);
+        for(int i=0;i<keys.size();i++){
+        	String key = keys.get(i);
+        	Object value = paramMap.get(key)
+        }
+        */
 
 		Iterator iter = new TreeSet(paramMap.keySet()).iterator();  // TreeSet => 有序的Set		
 		while ( iter.hasNext() ) {
@@ -92,7 +128,7 @@ public class MapUtil {
 		map.put("id", 112);
 		map.put("age", null);
 		map.put("name", "tom");
-		System.out.println(sort(map));
+		System.out.println(map2SortFormString(map));
 		
 		Person person = new Person();
 		mapToBean( person, map);

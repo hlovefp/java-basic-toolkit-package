@@ -186,6 +186,45 @@ public class AESUtil {
 		return new String(decrypt(HexUtil.toByteArray(data), key.getBytes(), "AES/ECB/NoPadding"));
 	}
 	
+	/**
+	 * AES/CBC/NoPadding 加密
+	 */
+	public static String encryptAESCBCNoPadding(String data, String key, String iv){
+		try {
+            Cipher cipher = Cipher.getInstance("AES/CBC/NoPadding");
+            int blockSize = cipher.getBlockSize();
+            
+            byte[] dataBytes = data.getBytes();
+            int plaintextLength = dataBytes.length;
+            if (plaintextLength % blockSize != 0) {
+                plaintextLength = plaintextLength + (blockSize - (plaintextLength % blockSize));
+            }
+            byte[] plaintext = new byte[plaintextLength];
+            System.arraycopy(dataBytes, 0, plaintext, 0, dataBytes.length);
+
+            SecretKeySpec keyspec = new SecretKeySpec(key.getBytes(), "AES");
+            IvParameterSpec ivspec = new IvParameterSpec(iv.getBytes());  // 初始向量
+            cipher.init(Cipher.ENCRYPT_MODE, keyspec, ivspec);
+            return HexUtil.toHex(cipher.doFinal(plaintext));
+        } catch (Exception e) {
+            e.printStackTrace();;
+        }
+		return null;
+	}
+	
+	public static String decryptAESCBCNoPadding(String data, String key, String iv){
+		try{
+            SecretKeySpec keyspec = new SecretKeySpec(key.getBytes(), "AES");
+            IvParameterSpec ivspec = new IvParameterSpec(iv.getBytes());
+            Cipher cipher = Cipher.getInstance("AES/CBC/NoPadding");
+            cipher.init(Cipher.DECRYPT_MODE, keyspec, ivspec);
+            return new String(cipher.doFinal(HexUtil.toByteArray(data)));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+		return null;
+	}
+	
 
 	/**
 	 * AES/ECB/ZeroPadding加密<p>

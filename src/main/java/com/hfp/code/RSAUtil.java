@@ -70,15 +70,6 @@ public class RSAUtil {
     	return verifySign( data, sign, publicKey, "MD5withRSA");
     }
     
-    public static boolean verifySignSHA1WithRSA(byte[] data, byte[] sign,PublicKey publicKey){
-    	//Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-    	return verifySign( data, sign, publicKey, "SHA1WithRSA");
-    }
-    
-    public static boolean verifySignSHA256withRSA(byte[] data, byte[] sign,PublicKey publicKey){
-    	return verifySign( data, sign, publicKey, "SHA256withRSA");
-    }
-    
     /**
      * 验证签名
      *
@@ -97,6 +88,62 @@ public class RSAUtil {
         }
         return false;
     }
+    
+    public static boolean verifySignSHA1WithRSA(byte[] data, byte[] sign,PublicKey publicKey){
+    	return verifySign( data, sign, publicKey, "SHA1WithRSA");
+    }
+    
+    public static boolean verifySignSHA1WithRSA(String data, String sign, PublicKey publicKey) {
+        try {
+            byte[] dataByte = data .getBytes("UTF-8");
+            byte[] signByte = HexUtil.toByteArray(sign);
+            return verifySignSHA1WithRSA(dataByte, signByte, publicKey);
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+    
+    public static boolean verifySignSHA256withRSA(byte[] data, byte[] sign,PublicKey publicKey){
+    	return verifySign( data, sign, publicKey, "SHA256withRSA");
+    }
+    
+    /**
+     * 
+     * @param data
+     * @param sign  Hex字符串
+     * @param publicKey
+     * @return
+     */
+    public static boolean verifySignSHA256withRSA(String data, String sign, PublicKey publicKey) {
+        try {
+            byte[] dataByte = data .getBytes("UTF-8");
+            byte[] signByte = HexUtil.toByteArray(sign);
+            return verifySignSHA256withRSA(dataByte, signByte, publicKey);
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+    
+    /**
+     * 
+     * @param data
+     * @param sign   BASE64字符串
+     * @param publicKey
+     * @return
+     */
+    public static boolean verifySignSHA256withRSAWithBASE64(String data, String sign, PublicKey publicKey) {
+        try {
+            byte[] dataByte = data .getBytes("UTF-8");
+            byte[] signByte = BASE64Util.decode(sign.getBytes());
+            return verifySignSHA256withRSA(dataByte, signByte, publicKey);
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+    
     
     /**
      * 签名
@@ -140,6 +187,44 @@ public class RSAUtil {
             byte[] dataByte = data.getBytes("UTF-8");
             byte[] signByte = sign(dataByte, key, "SHA1WithRSA");
             return (signByte == null) ? null : HexUtil.toHex(signByte);
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    
+    /**
+     * 
+     * @param data
+     * @param key
+     * @return
+     *    返回Hex字符串
+     */
+    public static String signSHA256WithRSA(String data, PrivateKey key) {
+    	
+        try {
+            byte[] dataByte = data.getBytes("UTF-8");
+            byte[] signByte = sign(dataByte, key, "SHA256WithRSA");
+            return (signByte == null) ? null : HexUtil.toHex(signByte);
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    
+    /**
+     * 
+     * @param data
+     * @param key
+     * @return
+     *    返回Base64字符串
+     */
+    public static String signSHA256WithRSA2BASE64(String data, PrivateKey key) {
+    	
+        try {
+            byte[] dataByte = data.getBytes("UTF-8");
+            byte[] signByte = sign(dataByte, key, "SHA256WithRSA");
+            return (signByte == null) ? null : new String(BASE64Util.encode(signByte));
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
@@ -607,12 +692,31 @@ public class RSAUtil {
     	PublicKey publicKey = getPublicKeyByPem("E:\\tmp\\java-basic-toolkit-package\\src\\main\\resources\\880000199_public_key.pem");
     	PrivateKey privateKey = getPrivateKeyByPem("E:\\tmp\\java-basic-toolkit-package\\src\\main\\resources\\880000199_private_key.pem");
    	
-    	
+    	/*
     	String data="welcome";
     	String sign = signMD5withRSA( data, privateKey);
     	System.out.println("sign:"+sign);
     	System.out.println(verifySignMD5withRSA(data, sign, publicKey));
+    	*/
     	
+    	/*
+    	String data="welcome";
+    	String sign = signSHA1WithRSA( data, privateKey);
+    	System.out.println("sign:"+sign);
+    	System.out.println(verifySignSHA1WithRSA(data, sign, publicKey));
+    	*/
+    	
+    	/*
+    	String data="welcome";
+    	String sign = signSHA256WithRSA( data, privateKey);
+    	System.out.println("sign:"+sign);
+    	System.out.println(verifySignSHA256withRSA(data, sign, publicKey));
+    	*/
+    	
+    	String data="welwelcomewelco设立了商量商量商量商量了omewelcomewelcomewelcomewelcomewelcomewelcomecome";
+    	String sign = signSHA256WithRSA2BASE64( data, privateKey);
+    	System.out.println("sign:"+sign);
+    	System.out.println(verifySignSHA256withRSAWithBASE64(data, sign, publicKey));
     	
     	/*
     	String data="welcome";

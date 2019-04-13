@@ -1,5 +1,8 @@
 package com.hfp.common;
 
+import java.text.MessageFormat;
+import java.util.Date;
+
 public class StringUtil {
 	/**
 	 * 驼峰命名法工具: 将"hello_world" 转换成 "helloWorld"
@@ -96,7 +99,39 @@ public class StringUtil {
     	return result.toString();
     }
     
+    /**
+     * 拼接生成字符串
+     * @param result
+     * @param arrs
+     * @return
+     */
+    public static String messageFormat(String result, Object[] arrs){
+/*
+FormatElement:
+ { ArgumentIndex }   => "{0}"
+ { ArgumentIndex , FormatType }   => "{0,number}"
+ { ArgumentIndex , FormatType , FormatStyle }  => "{0,number,currency}"
+
+FormatType: number、date、time、choice(需要使用ChoiceFormat)
+FormatStyle: short、medium、long、full、integer、currency、percent、SubformatPattern(子模式)
+
+String format ="{0,number,###.##}, {1}, {2,number,currency}";
+Object[] arr = {189.328, "helo", 193.32};
+System.out.println(MessageFormat.format(format,arr));  // 189.33, helo, $193.32
+*/
+        return MessageFormat.format(result, arrs);
+    }
+    
+    
+    
+    
     public static void main(String[] args){
     	System.out.println(jsGetVal("row.user.id"));
+    	
+    	StringBuilder sb=new StringBuilder();
+        sb.append("insert into test_tb ( createTime, name ) values (''{0}'', ''{1}'')");
+        Object[] arr={new Date(),"tom"};
+        // insert into test_tb ( createTime, name ) values ('19-4-12 下午5:33', 'tom')
+        System.out.println(MessageFormat.format(sb.toString(), arr));
     }
 }

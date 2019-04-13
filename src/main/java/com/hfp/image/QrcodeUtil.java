@@ -88,7 +88,7 @@ public class QrcodeUtil {
     	qrcode.setQrcode(text, width, height, format);
     	ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     	qrcode.writeToStream(outputStream);
-    	return BASE64Util.encode(outputStream.toByteArray());
+    	return new String(BASE64Util.encode(outputStream.toByteArray()));
     }
 
     public static void toQrcodeFile(String text, File outputFile, int width, int height,String format) throws IOException, WriterException{

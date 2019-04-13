@@ -7,12 +7,15 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -86,11 +89,11 @@ public class HttpUtil {
 	 * post发送 application/json 格式数据，接收json格式数据
 	 * 请求与响应的Body都是Json对象
 	 * @param url
-	 * @param dataMap
+	 * @param map
 	 * @return
 	 */
-	public static JSONObject sendAndRecvJson(String url,Map<String, Object> dataMap){
-		return sendAndRecvJson(url, JSON.toJSONString(dataMap));
+	public static JSONObject sendAndRecvJson(String url,Map<String, Object> map){
+		return sendAndRecvJson(url, JSON.toJSONString(map));
 	}
 
 	/**
@@ -371,5 +374,66 @@ public class HttpUtil {
 				 .append(e.getValue());
 		}
 		return param.toString().substring(1);
+	}
+	
+	public static void httpWrite(HttpServletResponse response, String body){
+		StringBuilder message = new StringBuilder();
+		message.append("<html>");
+		message.append("<head>");
+		message.append("<meta name='viewport' content='width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no'/>");
+		message.append("</head><body><h4>");
+		message.append(body);
+		message.append("</h4></body></html>");
+		
+		try {
+			response.setCharacterEncoding("utf-8");
+			response.setHeader("Content-type", "text/html;charset=UTF-8");
+			response.getWriter().write(message.toString());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static String sendGet(String url, String param) {
+		StringBuilder result = new StringBuilder();
+		BufferedReader in = null;
+		try {
+			URL realUrl = new URL(url + "?" + param);
+			
+			URLConnection connection = realUrl.openConnection();   // 打开和URL之间的连接
+			connection.setRequestProperty("accept", "*/*");
+			connection.setRequestProperty("connection", "Keep-Alive");
+			connection.setRequestProperty("user-agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1;SV1)");
+			connection.setConnectTimeout(5000);
+			connection.setReadTimeout(5000);
+			
+			connection.connect();  // 建立连接
+			
+			/*
+			// 获取所有响应头字段
+			Map<String, List<String>> map = connection.getHeaderFields();
+			// 遍历所有的响应头字段
+			for (String key : map.keySet()) {
+				System.out.println(key + "--->" + map.get(key));
+			}
+			*/
+			// 定义 BufferedReader输入流来读取URL的响应
+			in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+			String line;
+			while ((line = in.readLine()) != null) {
+				result.append(line);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (in != null) {
+					in.close();
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		return result.toString();
 	}
 }
