@@ -1,0 +1,41 @@
+server:
+  port: 8080
+  connection-timeout: 60000 # 下载文件的超时时间
+
+spring:
+  cache:
+    #type: redis                    # 缓存类型（ehcache、redis）
+    redis:
+      time-to-live: 10000          # 缓存过期时间，单位毫秒,默认无限
+    type: ehcache
+    ehcache:
+      config: classpath:ehcache.xml  # ehcache 配置文件
+
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    password: 123456
+    #database: 0            # Redis数据库索引（默认为0）
+    #timeout: 0             # 连接超时时间（毫秒）
+    #pool:
+      #max-active: 8        # 连接池最大连接数（使用负值表示没有限制）
+      #pool.max-idle: 8     # 连接池中的最大空闲连接
+      #max-wait: -1         # 连接池最大阻塞等待时间（使用负值表示没有限制）
+      #min-idle: 0          # 连接池中的最小空闲连接
+
+  data:
+    mongodb:
+      host: 127.0.0.1
+      port: 27017
+      database: test
+
+fdfs:
+  soTimeout: 1501        # 读取时间
+  connectTimeout: 691    # 连接超时时间
+  #charset: UTF-8       # 编码默认UTF-8，charset属性不能自定义
+  thumbImage:            # 缩略图
+    width: 150              # 宽
+    height: 150             # 高
+  trackerList:           # tracker列表
+    - 172.18.10.144:22122
+    - 172.18.10.144:22122
