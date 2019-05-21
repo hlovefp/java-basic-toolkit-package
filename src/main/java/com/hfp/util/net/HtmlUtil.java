@@ -1,9 +1,5 @@
 package com.hfp.util.net;
 
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.safety.Whitelist;
-
 public class HtmlUtil {
 	/**
 	 * 去掉HTML中的所有标签

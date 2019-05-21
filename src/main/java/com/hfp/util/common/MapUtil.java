@@ -8,7 +8,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeSet;
+
+import com.thoughtworks.xstream.mapper.Mapper.Null;
 
 public class MapUtil {
 	
@@ -17,34 +20,48 @@ public class MapUtil {
 	 * @param paramMap
 	 * @return
 	 */
-	public static String map2FormString(Map paramMap, String... ignoreKey) {
+	public static <K,V> String map2FormString(Map<K,V> paramMap, String... ignoreKey) {
 		
 		if(paramMap == null){
 			return null;
 		}
-		
+
 		List<String> ignoreKeyList = null;
 		if(ignoreKey!=null){
 			ignoreKeyList = Arrays.asList(ignoreKey);
-		}else{
-			ignoreKeyList = new ArrayList<>();
 		}
 
-		StringBuilder paramString = new StringBuilder();
+		StringBuilder result = new StringBuilder();
 
-		Iterator iterator = paramMap.keySet().iterator();
+		/*
+		Iterator<K> iterator = paramMap.keySet().iterator();
 		while(iterator.hasNext()){
 			String key = iterator.next().toString();
-			if(ignoreKeyList.contains(key))
+			if( ignoreKeyList != null && ignoreKeyList.contains(key))
 				continue;
 			Object value = paramMap.get(key);
-			paramString.append(key)
-				.append("=")
-				.append(value==null?"":value.toString())
-				.append("&");
+			result.append("&")
+				  .append(key)
+				  .append("=")
+				  .append(value==null?"":value.toString());
 		}
+		*/
+		
+		
+		for (Map.Entry<K, V> entry: paramMap.entrySet()) {
+			String key = entry.getKey().toString();
+			if( ignoreKeyList != null && ignoreKeyList.contains(key))
+				continue;;
+			Object value = entry.getValue();
+			result.append("&")
+			     .append(key)
+			     .append("=")
+				 .append(value==null?"":value.toString());
+		}
+		
 
-		return paramString.toString().substring(0, paramString.length()-1);
+
+		return result.toString().substring(1);
 	}
 	
 	/**
@@ -52,7 +69,7 @@ public class MapUtil {
 	 * @param paramMap
 	 * @return
 	 */
-	public static String map2SortFormString(Map paramMap, String... ignoreKey) {
+	public static <K,V> String map2SortFormString(Map<K,V> paramMap, String... ignoreKey) {
 		
 		if(paramMap == null){
 			return null;
@@ -61,8 +78,6 @@ public class MapUtil {
 		List<String> ignoreKeyList = null;
 		if(ignoreKey!=null){
 			ignoreKeyList = Arrays.asList(ignoreKey);
-		}else{
-			ignoreKeyList = new ArrayList<>();
 		}
 
 		StringBuilder sort = new StringBuilder();
@@ -76,19 +91,19 @@ public class MapUtil {
         }
         */
 
-		Iterator<String> iter = new TreeSet<String>(paramMap.keySet()).iterator();  // TreeSet => 有序的Set		
+		Iterator<K> iter = new TreeSet<K>(paramMap.keySet()).iterator();  // TreeSet => 有序的Set		
 		while ( iter.hasNext() ) {
-			String key = iter.next();
-			if(ignoreKeyList.contains(key))
+			String key = iter.next().toString();
+			if(ignoreKeyList!=null && ignoreKeyList.contains(key))
 				continue;
 			Object value = paramMap.get(key);
-			sort.append(key)
+			sort.append("&")
+				.append(key)
 				.append("=")
-				.append(value==null?"":value.toString())
-				.append("&");
+				.append(value==null?"":value.toString());
 		}
 		
-		return sort.toString().substring(0, sort.length()-1);
+		return sort.toString().substring(1);
 	}
 	
 	
@@ -233,18 +248,21 @@ public class MapUtil {
 	}
 
 	public static void main(String[] args) {
-		/*
+		
 		Map<String, Object> map = new HashMap<>();
 		map.put("id", 112);
 		map.put("age", null);
 		map.put("name", "tom");
+		System.out.println(map2FormString(map));
 		System.out.println(map2SortFormString(map));
 		
+		/*
 		Person person = new Person();
 		mapToBean( person, map);
 		System.out.println(person.toString());
 		*/
 
+		/*
 		String string1 = "name=hfp&age=12";
 		System.out.println(formString2Map(string1).toString());
 		String string2 = "{name=hfp&age=}";
@@ -257,6 +275,7 @@ public class MapUtil {
 		System.out.println(formString2Map(string5).toString());
 		String string6 = "&name={hfp=12&age=12}&age=[1=3&2=4]";
 		System.out.println(formString2Map(string6).toString());
+		*/
 	}
 }
 

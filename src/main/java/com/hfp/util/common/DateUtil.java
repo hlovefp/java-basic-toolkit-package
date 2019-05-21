@@ -4,6 +4,8 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
@@ -31,6 +33,13 @@ public class DateUtil {
 	 */
 	public static String getFormatTime(String format, Date date) {
 		return new SimpleDateFormat(format).format(date);
+	}
+	
+	/**
+	 * ISODateTimeFormat 2019-05-15T14:18:09.832
+	 */
+	public static String getISODateTimeFormat() {
+		return LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME);
 	}
 
 	/**
@@ -184,7 +193,7 @@ public class DateUtil {
 	
 	
 	public static void main(String[] args) throws Exception {
-		Locale.setDefault(Locale.CHINA);
+		//Locale.setDefault(Locale.CHINA);
 
 		// System.out.println(getSdfTimes()+":"+getDelayTime(-15));
 		//System.out.println(checkTimeShortCompare("112136","112136"));
@@ -211,6 +220,5 @@ public class DateUtil {
         //System.out.println(DateFormat.getDateTimeInstance(DateFormat.SHORT,DateFormat.LONG).format(new Date())); // 19-4-13 下午12时57分17秒
         //System.out.println(DateFormat.getDateTimeInstance(DateFormat.LONG,DateFormat.SHORT).format(new Date())); // 2019年4月13日 下午12:57
         //System.out.println(DateFormat.getDateTimeInstance(DateFormat.SHORT,DateFormat.SHORT).format(new Date()));// 19-4-13 下午12:57
-        
 	}
 }

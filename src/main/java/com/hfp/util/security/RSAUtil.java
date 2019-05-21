@@ -2,6 +2,7 @@ package com.hfp.util.security;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.Key;
@@ -22,7 +23,9 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.HashMap;
 import java.util.Map;
 import javax.crypto.Cipher;
-import org.apache.commons.lang3.ArrayUtils;
+
+//import org.bouncycastle.jce.provider.BouncyCastleProvider;
+
 import sun.misc.BASE64Encoder;
 
 public class RSAUtil {
@@ -405,6 +408,11 @@ public class RSAUtil {
     	byte[] buffer = Base64.decodeBase64(base64EncodePublicKey.getBytes());
         X509EncodedKeySpec pubX509 = new X509EncodedKeySpec(buffer);
         return keyf.generatePublic(pubX509);
+        /*
+        Security.addProvider(new BouncyCastleProvider());
+        org.bouncycastle.openssl.PEMReader reader = new PEMReader(new StringReader(base64EncodePublicKey));
+        PublicKey publicKey = (PublicKey)reader.readObject();
+        */
     }
     
     /**

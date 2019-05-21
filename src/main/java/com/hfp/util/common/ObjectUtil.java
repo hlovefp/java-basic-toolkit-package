@@ -3,6 +3,9 @@ package com.hfp.util.common;
 import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
+import java.beans.BeanInfo;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
@@ -47,6 +50,9 @@ public class ObjectUtil {
 	 * 可以利用注解来达到指定字段不放入到Map中
 	 */
 	public static Map<String,Object> object2Map(Object bean) {
+		if (bean == null)
+            return null;
+
 		Map<String,Object> map = new HashMap<String,Object>();
 		Field[] fields = bean.getClass().getDeclaredFields();
 		for (Field field : fields) {
@@ -63,6 +69,29 @@ public class ObjectUtil {
 			}
 		}
 		return map;
+	}
+	
+	public static Map<String,Object> object2Map2(Object bean) {
+		if (bean == null)
+            return null;
+
+		Map<String, Object> map = new HashMap<>();
+        try {
+            BeanInfo beanInfo = Introspector.getBeanInfo(bean.getClass());
+            PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
+            for (PropertyDescriptor property : propertyDescriptors) {
+                String key = property.getName();
+                if (key.compareToIgnoreCase("class") == 0) {
+                    continue;
+                }
+                Method getter = property.getReadMethod();  // get方法
+                Object value = (getter != null) ? getter.invoke(bean) : null;
+                map.put(key, value);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return map;
 	}
 
 	/**

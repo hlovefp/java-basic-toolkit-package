@@ -61,6 +61,24 @@ public class HttpServletUtil {
         return ip;
 	}
 	
+	public static void httpWrite(HttpServletResponse response, String body){
+		StringBuilder message = new StringBuilder();
+		message.append("<html>");
+		message.append("<head>");
+		message.append("<meta name='viewport' content='width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no'/>");
+		message.append("</head><body><h4>");
+		message.append(body);
+		message.append("</h4></body></html>");
+		
+		try {
+			response.setCharacterEncoding("utf-8");
+			response.setHeader("Content-type", "text/html;charset=UTF-8");
+			response.getWriter().write(message.toString());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public static void httpWriteBody(HttpServletResponse response,String body){
 		System.out.println("应答: "+body);
 		try {

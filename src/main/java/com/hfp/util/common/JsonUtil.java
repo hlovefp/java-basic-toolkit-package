@@ -8,15 +8,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
-
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.alibaba.fastjson.annotation.JSONField;
-import com.alibaba.fastjson.serializer.JSONLibDataFormatSerializer;
-import com.alibaba.fastjson.serializer.SerializeConfig;
-import com.alibaba.fastjson.serializer.SerializerFeature;
 
 public class JsonUtil {
 	
@@ -76,6 +71,29 @@ public class JsonUtil {
 		//return new com.google.gson.Gson().fromJson(json, c);
 		return com.alibaba.fastjson.JSON.parseObject(json, c);
 	}
+	
+	/*
+     * JSON字符串转换为Object
+     *
+     * @param strJsonString 要转换的JSON字符
+     * @param clazz     要转的对象类
+     * @return          转换的对
+     *
+	 *
+    public static <T> T jsonString2Object(String strJsonString, Class<T> clazz) {
+        try {
+            org.codehaus.jackson.JsonFactory jf = new JsonFactory();
+            jf.configure(org.codehaus.jackson.JsonGenerator.Feature.WRITE_NUMBERS_AS_STRINGS, true);
+            org.codehaus.jackson.map.ObjectMapper objectMapper = new ObjectMapper(jf);
+            if (strJsonString==null || strJsonString.trim().length()==0)
+                strJsonString = "{}";
+            return objectMapper.readValue(strJsonString, clazz);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    */
 	
 	public static <T> T jsonString2JavaBean(String json, TypeReference<T> type){
 		return com.alibaba.fastjson.JSON.parseObject(json, type);

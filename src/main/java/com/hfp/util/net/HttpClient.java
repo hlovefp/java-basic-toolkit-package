@@ -18,7 +18,7 @@ import java.util.Map.Entry;
 
 import javax.net.ssl.HttpsURLConnection;
 
-import com.hfp.util.net.BaseHttpSSLSocketFactory.TrustAnyHostnameVerifier;
+import com.hfp.util.net.HttpSSLSocketFactory.TrustAnyHostnameVerifier;
 /**
  * 
  * @ClassName HttpClient
@@ -226,7 +226,7 @@ public class HttpClient {
 			HttpsURLConnection husn = (HttpsURLConnection) httpURLConnection;
 			//是否验证https证书，测试环境请设置false，生产环境建议优先尝试true，不行再false
 			//if(!SDKConfig.getConfig().isIfValidateRemoteCert()){
-				husn.setSSLSocketFactory(new BaseHttpSSLSocketFactory());
+				husn.setSSLSocketFactory(new HttpSSLSocketFactory());
 				husn.setHostnameVerifier(new TrustAnyHostnameVerifier());//解决由于服务器证书问题导致HTTPS无法访问的情况
 			//}
 			return husn;
@@ -258,7 +258,7 @@ public class HttpClient {
 			HttpsURLConnection husn = (HttpsURLConnection) httpURLConnection;
 			//是否验证https证书，测试环境请设置false，生产环境建议优先尝试true，不行再false
 			//if(!SDKConfig.getConfig().isIfValidateRemoteCert()){
-				husn.setSSLSocketFactory(new BaseHttpSSLSocketFactory());
+				husn.setSSLSocketFactory(new HttpSSLSocketFactory());
 				husn.setHostnameVerifier(new TrustAnyHostnameVerifier());//解决由于服务器证书问题导致HTTPS无法访问的情况
 			//}
 			return husn;
