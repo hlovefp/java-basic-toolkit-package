@@ -301,32 +301,15 @@ public class OkHttpUtils {
 		
 		/*
 		 // 信任所有证书
-		class TrustAllHostnameVerifier implements HostnameVerifier {
-    		public boolean verify(String hostname, SSLSession session) {
-      			return new X509Certificate[0];
-    		}
-		}
-		class TrustAllManager implements X509TrustManager {
-		    public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-		    }
-		    public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-		    }
-		    public X509Certificate[] getAcceptedIssuers() {
-		        return null;
-		    }
-		}
-		SSLSocketFactory createSSLSocketFactory() {
-    		SSLSocketFactory sSLSocketFactory = null;
-		    try {
-		        SSLContext sc = SSLContext.getInstance("TLS");
-		        sc.init(null, new TrustManager[]{new TrustAllManager()}, new SecureRandom());
-		        sSLSocketFactory = sc.getSocketFactory();
-		    } catch (Exception e) {
-		    }
-		    return sSLSocketFactory;
-		}
-		builder.sslSocketFactory(createSSLSocketFactory());
-		builder.hostnameVerifier(new TrustAllHostnameVerifier());
+		SSLSocketFactory sslSocketFactory = null;
+	    try {
+	        SSLContext sc = SSLContext.getInstance("TLS");
+	        sc.init(null, new TrustManager[]{new HttpSSLSocketFactory.TrustAllManager()}, new SecureRandom());
+	        sslSocketFactory = sc.getSocketFactory();
+	    } catch (Exception e) {
+	    }
+		builder.sslSocketFactory(sslSocketFactory);
+		builder.hostnameVerifier(new HttpSSLSocketFactory.TrustAnyHostnameVerifier());
 		 */
 		
 		/*

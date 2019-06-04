@@ -1,5 +1,9 @@
 package com.hfp;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
@@ -7,19 +11,17 @@ import org.springframework.context.ConfigurableApplicationContext;
 
 import com.hfp.db.MongodbUtil;
 import com.hfp.db.RedisUtil;
-import com.hfp.test.Department;
-import com.hfp.test.TestSpringCache;
+import com.hfp.util.io.IOUtil;
 
 @EnableCaching          // 开启缓存功能
 @SpringBootApplication
 public class Application {
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		ConfigurableApplicationContext context = SpringApplication.run(Application.class, args);
-		testMongoDB(context);
+
+		//testMongoDB(context);
 		//testRedis(context);
-		//testRedisCache(context);
-		//testEhcache(context);
 	}
 	
 	public static void testMongoDB(ConfigurableApplicationContext context){
@@ -43,29 +45,5 @@ public class Application {
 		//System.out.println(redisUtil.set("name",new String("hfp")));
 		//System.out.println(redisUtil.hasKey("name"));
 		//System.out.println(redisUtil.get("name"));
-	}
-	
-	public static void testRedisCache(ConfigurableApplicationContext context){
-		// 测试使用Redis做缓存  ==> @EnableCaching RedisConfig.java TestSpringCache.java
-		// 配置文件spring.cache.type=redis,spring.cache.redis...
-		//TestSpringCache redisCache = context.getBean(TestSpringCache.class);
-		//redisCache.save(new Department(new Integer(20),"hfp"));
-		//System.out.println(redisCache.getDepartmentById(new Integer(20)));
-		//redisCache.deleteById(new Integer(10));
-		
-		//redis命令登陆查看
-		//redis-cli
-		//>auth password
-		//>keys *
-		//2) "department::10"
-		//>get department::10
-	}
-	
-	public static void testEhcache(ConfigurableApplicationContext context){
-		// Ehcache(缓存): 纯Java的进程内缓存框架
-		// 配置文件spring.cache.type=ehcache,spring.cache.ehcache...
-		TestSpringCache redisCache = context.getBean(TestSpringCache.class);
-		redisCache.save(new Department(new Integer(20),"hfp"));
-		System.out.println(redisCache.getDepartmentById(new Integer(20)));
 	}
 }

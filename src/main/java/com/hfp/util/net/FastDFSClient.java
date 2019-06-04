@@ -21,7 +21,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-@Component
+//@Component
 public class FastDFSClient {
     private final Logger logger = LoggerFactory.getLogger(FastDFSClient.class);
 

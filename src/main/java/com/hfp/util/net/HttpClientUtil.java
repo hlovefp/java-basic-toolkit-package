@@ -1,36 +1,43 @@
 package com.hfp.util.net;
 
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLConnection;
+import java.io.InputStream;
+import java.net.URI;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLContext;
 
-import javax.servlet.http.HttpServletResponse;
-
+import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.mime.MultipartEntity;
-import org.apache.http.entity.mime.content.FileBody;
-import org.apache.http.entity.mime.content.StringBody;
+import org.apache.http.config.Registry;
+import org.apache.http.config.RegistryBuilder;
+import org.apache.http.conn.socket.ConnectionSocketFactory;
+import org.apache.http.conn.socket.PlainConnectionSocketFactory;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.TrustStrategy;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.util.EntityUtils;
+import com.hfp.util.common.MapUtil;
 
 /*
 //工具包下的HttpClient，  最后更新 2007年    
@@ -48,79 +55,182 @@ import org.apache.commons.httpclient.params.HttpMethodParams;
 */
 
 public class HttpClientUtil {
-
-	/**
-	 * 使用httpclient发送post请求
-	 * @param url
-	 * @param reqMap
-	 * @return
-	 */
-    public static String doPost(String url, Map<String, String> reqMap) {
-    	/*
+	
+	private static CloseableHttpClient createSSLClientDefault() {
+		try {
+			SSLContextBuilder sslContextBuilder = new SSLContextBuilder().loadTrustMaterial( null, new TrustStrategy() {
+				public boolean isTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+					return true;  // 信任所有
+				}
+			});
+			SSLContext context = sslContextBuilder.build();
+			HostnameVerifier verifier = NoopHostnameVerifier.INSTANCE;
+			SSLConnectionSocketFactory sslSocketFactory = new SSLConnectionSocketFactory( context, verifier);
+			Registry<ConnectionSocketFactory> registry = RegistryBuilder.<ConnectionSocketFactory>create()
+					.register("http", PlainConnectionSocketFactory.getSocketFactory())
+					.register("https", sslSocketFactory).build();
+			PoolingHttpClientConnectionManager connMgr = new PoolingHttpClientConnectionManager(registry);
+			
+			return HttpClientBuilder.create().setConnectionManager(connMgr).build();
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return HttpClients.createDefault();
+	}
+	
+	/*
+	public static void doPost(){
+		
     	BasicHttpParams httpParams = new BasicHttpParams();
 		HttpConnectionParams.setConnectionTimeout(httpParams, 10 * 1000);
 		HttpConnectionParams.setSoTimeout(httpParams, 10 * 1000);
 		HttpClient client = new DefaultHttpClient(httpParams);
 		HttpResponse resp = client.execute(HttpPost);
-    	 */
-    	CloseableHttpClient httpClient = HttpClients.createDefault();
+    	 
+	}
+*/
+	
+    
+    /**
+     * 
+     * @param url       http或https
+     * @param content
+     * @param contentType
+     *    text/html         HTML格式
+     *    text/plain        纯文本格式 
+     *    application/json  JSON数据格式
+     *    application/x-www-form-urlencoded
+     *    application/xml   XML数据格式
+     * @return
+     */
+    public static String doPost(String url, String content, String contentType) {
+    	CloseableHttpClient httpClient = createSSLClientDefault();
     	CloseableHttpResponse response = null;
+    	HttpPost httpPost = new HttpPost(url);
         try {
-            HttpPost httpPost = new HttpPost(url);   // 创建Http Post请求
-            //httpPost.setHeader(name, value);
 
-            // 创建参数列表
-            if (reqMap != null) {
-                List<NameValuePair> paramList = new ArrayList<>();
-                for (String key : reqMap.keySet()) {
-                    paramList.add(new BasicNameValuePair(key, reqMap.get(key)));
-                }
-                // 键值对,类似于传统的application/x-www-form-urlencoded表单上传
-                UrlEncodedFormEntity formEntity = new UrlEncodedFormEntity(paramList);
-                //formEntity.setChunked(true);
-                //formEntity.setContentType("");
-                httpPost.setEntity(formEntity);
-                
-                /*
-                JSONObject postData = new JSONObject();
-                postData.put("supervisor", "1");
-                // StringEntity可以自己指定ContentType，而默认值是 text/plain，
-              	// 数据的形式就非常自由了，可以组织成自己想要的任何形式，一般用来存储json数据
-                StringEntity stringEntity = new StringEntity(postData.toString(), "utf-8");
-                //stringEntity.setContentType("");
-                httpPost.setEntity(stringEntity); 
-                */
-
-                /*
-                 // HttpCient4.3之后上传文件主要使用的类是位于org.apache.http.entity.mime下的MultipartEntityBuilder
-                 MultipartEntityBuilder builder = MultipartEntityBuilder.create();
-                // 第一个参数name的值，是服务器已经定义好的，服务器会根据这个字段来读取我们上传的文件流
-                
-                //builder.addBinaryBody(name, filePath, ContentType.create(mimeType), filename)
-                HttpEntity entity = builder.build();
-                
-                //  在HttpCient4.3之前上传文件主要使用MultipartEntity这个类
-                // MultipartEntity文件上传用到，类似于表单的类型为multipart/form-data
-				MultipartEntity entity = new MultipartEntity();
- 				// 上传文本，"key" 为字段名,后边new StringBody(text,Charset.forName(CHARSET))为参数值，
- 				// 其实就是正常的值转换成utf-8的编码格式  
-				entity.addPart("key",new StringBody(text, Charset.forName("UTF-8")));
-				entity.addPart("audio", new FileBody(new File("path"), "audio/*"));  // 上传音频文件  
-				entity.addPart("fileimg", new FileBody(new File("path1"), "image/*"));// 上传图片1  
-				entity.addPart("fileimg", new FileBody(new File("path2"), "image/*"));// 上传图片2  
-                httpPost.setEntity(entity); 
-                
-                // 服务端获取
-                //MultipartHttpServletRequest params=((MultipartHttpServletRequest) request);
-        		//List<MultipartFile> files = ((MultipartHttpServletRequest) request).getFiles("file");
-				// MultipartFile file = files.get(0);
-				// file.getOriginalFilename();
-				// file.getBytes();
-                */
+            if (content != null) {
+                StringEntity stringEntity = new StringEntity( content, "utf-8");
+                stringEntity.setContentType(contentType); // 默认值是 text/plain
+                httpPost.setEntity(stringEntity);
+                //httpPost.addHeader(name, value);
             }
+
+            response = httpClient.execute(httpPost);  // 执行http请求
+            //response.getStatusLine().getStatusCode();
+            HttpEntity httpEntity = response.getEntity();
+            //InputStream is = httpEntity.getContent();
+            return EntityUtils.toString(httpEntity, "utf-8");
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+            	response.close();
+            	httpPost.releaseConnection();
+                httpClient.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
+    }
+
+    /*
+     * application/x-www-form-urlencoded表单上传
+     */
+    public static String doPostForm(String url, Map<String, String> paramsMap){
+    	CloseableHttpClient httpClient = createSSLClientDefault();
+        HttpPost httpPost = new HttpPost(url);
+        try {
+            List<NameValuePair> paramList = new ArrayList<>();
             
+            for (String key : paramsMap.keySet()) {
+            	paramList.add(new BasicNameValuePair( key, paramsMap.get(key)));
+            }
+
+            UrlEncodedFormEntity entity = new UrlEncodedFormEntity(paramList, "UTF-8");
+            //entity.setChunked(true);
+            //entity.setContentType("");
             
+            httpPost.setEntity(entity);
+            // httpPost.addHeader(name, value);
+
+            HttpResponse httpResponse = httpClient.execute(httpPost);
+            return EntityUtils.toString(httpResponse.getEntity());
+        } catch (Exception ex) {
+        	ex.printStackTrace();
+        } finally {
+            try {
+            	httpPost.releaseConnection();
+				httpClient.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+        }
+        return null;
+    }
+
+	/**
+	 * 使用httpclient发送post请求
+	 * @param url      http或https
+	 * @param reqMap
+	 * @return
+	 */
+	public static String doPostFile(String url, File file, Map<String, String> reqMap) {
+    	CloseableHttpClient httpClient = createSSLClientDefault();
+    	CloseableHttpResponse response = null;
+    	HttpPost httpPost = new HttpPost(url);
+        try {
+             MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+             builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
+
+            // 第一个参数name的值，是服务器已经定义好的，服务器会根据这个字段来读取我们上传的文件流
+            //builder.addBinaryBody( String name, byte[] b)
+            //builder.addBinaryBody( String name, byte[] b, ContentType contentType, String filename)
+            //builder.addBinaryBody( String name, File file)
+            //builder.addBinaryBody( String name, File file, ContentType contentType, String filename)
+            //builder.addBinaryBody( String name, InputStream stream, ContentType contentType, String filename) {
+            //builder.addBinaryBody( String name, InputStream stream)
+            //builder.addPart(FormBodyPart bodyPart)
+            //builder.addPart(String name, ContentBody contentBody)
+            //builder.addTextBody( String name, String text, ContentType contentType)
+            //builder.addTextBody( String name, String text)
+            //builder.addBinaryBody("file",new byte[]{},ContentType.DEFAULT_BINARY,"fileName.jpg");
+            builder.addBinaryBody("file", file);
             
+            //builder.addPart("file", new FileBody(file));
+            //builder.addPart("text1", new StringBody("message 1", ContentType.MULTIPART_FORM_DATA));
+            //builder.addPart("text2", new StringBody("message 2", ContentType.MULTIPART_FORM_DATA));
+            //builder.addTextBody("text3", "message 3", ContentType.DEFAULT_BINARY);
+            //builder.addBinaryBody("upstream", inputStream, ContentType.create("application/zip"), zipFileName);
+             
+            HttpEntity entity = builder.build();
+            
+            // 服务端获取
+            // CommonsMultipartResolver multipartResolver=new CommonsMultipartResolver(request.getSession().getServletContext());
+            // if(multipartResolver.isMultipart(request)){ // 多文件上传: 方法为POST,contentType以"mutipart/"开头
+            //    MultipartHttpServletRequest multiRequest=((MultipartHttpServletRequest) request);
+            
+    		//    List<MultipartFile> files = ((MultipartHttpServletRequest) request).getFiles("file");
+            //    for(int i=0; i<files.size(); i++){
+			//      MultipartFile file = files.get(0);
+			//      file.getOriginalFilename();
+			//      file.getBytes();
+            //    }
+            //
+            //    Map<String,Object> map=multiRequest.getParameterMap();
+            //    Iterator<String> iterator=multiRequest.getFileNames();//获取multiRequest中所有的文件名
+            //    //遍历所有文件
+            //     while(iterator.hasNext()){
+            //       MultipartFile file = multiRequest.getFile(iterator.next().toString());
+            //       ...
+            //    }
+            // }
+            
+            httpPost.setEntity(entity);
+
             response = httpClient.execute(httpPost);  // 执行http请求
             //response.getStatusLine().getStatusCode();
             HttpEntity httpEntity = response.getEntity();
@@ -137,89 +247,134 @@ public class HttpClientUtil {
         }
         return null;
     }
-
-    /*
-    static class SSLClient extends DefaultHttpClient {
-        SSLClient() throws Exception {
-            super();
-            SSLContext ctx = SSLContext.getInstance("TLS");
-            X509TrustManager tm = new X509TrustManager() {
-                @Override
-                public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-                }
-                @Override
-                public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-                }
-                @Override
-                public X509Certificate[] getAcceptedIssuers() {
-                    return null;
-                }
-            };
-            ctx.init(null, new TrustManager[]{tm}, null);
-            SSLSocketFactory ssf = new SSLSocketFactory(ctx, SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
-            ClientConnectionManager ccm = this.getConnectionManager();
-            SchemeRegistry sr = ccm.getSchemeRegistry();
-            sr.register(new Scheme("https", 443, ssf));
-        }
-    }
-    */
-
-    public static String doPostForm(String url, Map<String, Object> paramsMap){
-        HttpPost httppost = new HttpPost(url);   //post method
-        try {
-        	HttpClient client = new DefaultHttpClient();
-        	//client = new SSLClient();
-
-            //参数添加
-            List<NameValuePair> params = new ArrayList<>();
-            for (Map.Entry<String, Object> entry : paramsMap.entrySet()) {
-                params.add(new BasicNameValuePair(entry.getKey(), entry.getValue().toString()));
-            }
-            httppost.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
-
-            
-            HttpResponse httpResponse = client.execute(httppost);   // 发送请求
-            return EntityUtils.toString(httpResponse.getEntity());
-        } catch (Exception ex) {
-        	ex.printStackTrace();
-        } finally {
-            httppost.releaseConnection();
-        }
-        return null;
-    }
-    
-    /**
-	 * 
-	 * 
-	 * @Description: 上传文件
-	 * @param @param url
-	 * @param @param paramsMap
-	 * @param @param fileName
-	 * @param @param file
-	 * @param @return
-	 * @return String
-	 * @throws
+	
+	
+	
+	/**
+	 * POST方法，application/json
+	 * @param url    http和https都支持
+	 * @param body
+	 * @param header
+	 * @return
+	 * @throws Exception
 	 */
-	@SuppressWarnings("deprecation")
-	public static String doPostFile(String url, TreeMap<String, String> paramsMap, String fileName, File file) {
-		try {
-			HttpPost post = new HttpPost(url);
-			MultipartEntity reEntity = new MultipartEntity();
-			FileBody filebody = new FileBody(file);
-			reEntity.addPart(fileName, filebody);
-			Iterator<Map.Entry<String, String>> it = paramsMap.entrySet().iterator();
-			while ( it.hasNext()) {
-				Map.Entry<String, String> e = it.next();
-				reEntity.addPart(e.getKey(), new StringBody(e.getValue()));
-			}
+	public static String doPostJSON(String url, String jsonStr, Map<String, String> header) {
+		CloseableHttpClient client = createSSLClientDefault();
+		HttpPost httpPost = new HttpPost(url);
 
-			post.setEntity(reEntity);
-			HttpResponse httpResponse = HttpClients.createDefault().execute(post);
-			HttpEntity httpEntity = httpResponse.getEntity();
-			return EntityUtils.toString(httpEntity, "UTF-8");
+		if (header != null) {
+			for (String key : header.keySet()) {
+				httpPost.addHeader(key, header.get(key));
+			}
+		}
+		
+		StringEntity entity = new StringEntity(jsonStr.toString(), "utf-8");// 解决中文乱码问题
+		entity.setContentEncoding("UTF-8");
+		entity.setContentType("application/json");
+		
+		httpPost.setEntity(entity);
+
+		try{
+			HttpResponse response = client.execute(httpPost);
+			if (response.getStatusLine().getStatusCode() == 200) {
+				return EntityUtils.toString( response.getEntity(), "UTF-8");
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
+		}finally {
+			try {
+				client.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
+		
 		return null;
+	}
+	
+	/**
+	 * POST方法，application/json
+	 * @param url    http和https都支持
+	 * @param body
+	 * @return
+	 * @throws Exception
+	 */
+	public static String doPostJSON(String url, String jsonStr){
+		return doPostJSON(url, jsonStr, null);
+	}
+	
+	/**
+	 * 
+	 * @param url   http或https
+	 * @return
+	 */
+    public static String doGet(String uri){
+    	CloseableHttpClient client = createSSLClientDefault();
+    	HttpGet httpGet = new HttpGet(uri);
+    	try {
+			CloseableHttpResponse response = client.execute(httpGet);
+			InputStream is = response.getEntity().getContent();
+			return IOUtils.toString(is,"UTF-8");
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				httpGet.releaseConnection();
+				client.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+    	return null;
+    }
+	
+	/**
+	 * Get  ?key=value&key=value
+	 * @param url   http和https都支持
+	 * @param bodyMap
+	 * @param headerMap
+	 * @return
+	 */
+	public static String doGet(String url, Map<String, String> bodyMap, Map<String, String> headerMap) throws Exception {
+		CloseableHttpClient httpClient = createSSLClientDefault();
+		
+		URI uri = null;
+		if(bodyMap!=null){
+			uri = new URI(url + "?" + MapUtil.map2FormString(bodyMap));
+		} else{
+			uri = new URI(url);
+		}
+		
+		HttpGet get = new HttpGet(uri);
+		
+		if (headerMap != null) {
+			for (String key : headerMap.keySet()) {
+				get.addHeader(key, headerMap.get(key));
+			}
+		}
+
+		try {
+			CloseableHttpResponse response = httpClient.execute(get);
+			if (response.getStatusLine().getStatusCode() == 200) {
+				return EntityUtils.toString( response.getEntity(), "UTF-8");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				get.releaseConnection();
+				httpClient.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+
+		return null;
+	}
+	
+	public static void main(String[] args) throws Exception {
+		//System.out.println(doGet("https://www.baidu.com"));
+		//System.out.println(httpsGet("http://www.baidu.com", null, null));
+		//System.out.println(httpsGet("https://www.baidu.com", null, null));
 	}
 }

@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
 import javax.net.ssl.HostnameVerifier;
@@ -54,12 +55,10 @@ public class HttpSSLSocketFactory extends SSLSocketFactory {
 		return getSSLContext().getSocketFactory().createSocket(arg0, arg1, arg2, arg3);
 	}
 
-
-
 	private SSLContext createEasySSLContext() {
 		try {
 			SSLContext context = SSLContext.getInstance("SSL");
-			context.init(null, new TrustManager[] { MyX509TrustManager.manger }, null);
+			context.init(null, new TrustManager[] { new TrustAllManager() }, null);
 			return context;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -74,19 +73,15 @@ public class HttpSSLSocketFactory extends SSLSocketFactory {
 		return null;
 	}
 
-	public static class MyX509TrustManager implements X509TrustManager {
-
-		static MyX509TrustManager manger = new MyX509TrustManager();
-
-		public MyX509TrustManager() {
-		}
-
+	public static class TrustAllManager implements X509TrustManager {
 		public X509Certificate[] getAcceptedIssuers() {
 			return null;
+			//return new X509Certificate[] {};
 		}
-
-		public void checkClientTrusted(X509Certificate[] chain, String authType) { }
-		public void checkServerTrusted(X509Certificate[] chain, String authType) { }
+		public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException{
+		}
+		public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException{
+		}
 	}
 
 	/**

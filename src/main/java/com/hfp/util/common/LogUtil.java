@@ -21,13 +21,7 @@ import java.util.Map.Entry;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-/**
- * 
- * @ClassName LogUtil
- * @Description acpsdk日志工具类
- * @date 2016-7-22 下午4:04:35
- *
- */
+
 public class LogUtil {
 
 	private final static Logger GATELOG = LoggerFactory.getLogger("ACP_SDK_LOG");

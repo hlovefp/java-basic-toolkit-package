@@ -1,17 +1,12 @@
 package com.hfp.util.common;
 
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeSet;
-
-import com.thoughtworks.xstream.mapper.Mapper.Null;
 
 public class MapUtil {
 	

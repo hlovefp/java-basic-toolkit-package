@@ -18,15 +18,8 @@ import java.util.concurrent.TimeUnit;
  *  opsForZSet()	操作含有 zset 的数据
  *  opsForHash()	操作含有 hash 的数据
  */
-@Component
+//@Component
 public class RedisUtil {
-
-	/*
-	 <dependency>
-    	<groupId>org.springframework.boot</groupId>
-    	<artifactId>spring-boot-starter-data-redis</artifactId>
-	</dependency>
-	 */
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
 

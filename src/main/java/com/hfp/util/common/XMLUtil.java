@@ -176,7 +176,7 @@ public class XMLUtil {
 	}
 	
 	public static void main(String[] args) throws Exception{
-		String xml1="<Ips><RefundReq><head><Version>1.0.1</Version><SignType>16</SignType></head><body><MerBillNo>20190412105146066788</MerBillNo><OrgMerTime>20190412</OrgMerTime></body></RefundReq></Ips>";
+		//String xml1="<Ips><RefundReq><head><Version>1.0.1</Version><SignType>16</SignType></head><body><MerBillNo>20190412105146066788</MerBillNo><OrgMerTime>20190412</OrgMerTime></body></RefundReq></Ips>";
 		//System.out.println(XML2JSON(xml1).toString());
 		
 		//String xml2="<?xml version=\"1.0\" encoding=\"UTF-8\"?><Ips><RefundRsp><head><ReferenceID>20190412105146066788</ReferenceID><RspCode>000000</RspCode><RspMsg><![CDATA[申请成功]]></RspMsg></head><body><IpsBillNo>BO20190412104954040500</IpsBillNo><Status>P</Status></body></RefundRsp></Ips>";
